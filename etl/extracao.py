@@ -1,4 +1,5 @@
 import csv
+import json
 import sys
 from pathlib import Path
 
@@ -7,6 +8,7 @@ import requests
 URL_BASE = "http://127.0.0.1:8000"
 RAIZ = Path(__file__).resolve().parent.parent
 CAMINHO_PRODUTOS = RAIZ / "insumos" / "dados" / "produtos.csv"
+PASTA_BRUTOS = RAIZ / "brutos"
 
 
 class ErroExtracao(Exception):
@@ -59,6 +61,14 @@ def ler_produtos(caminho=CAMINHO_PRODUTOS):
         raise ErroExtracao(f"arquivo não encontrado: {caminho}") from erro
 
 
+def salvar_bruto(nome, registros, pasta=PASTA_BRUTOS):
+    """Grava os registros como vieram da API em <pasta>/<nome>.json."""
+    pasta.mkdir(parents=True, exist_ok=True)
+    caminho = pasta / f"{nome}.json"
+    with open(caminho, "w", encoding="utf-8") as arquivo:
+        json.dump(registros, arquivo, ensure_ascii=False, indent=2)
+
+
 # Verificação temporária: sai daqui quando o main.py existir
 if __name__ == "__main__":
     try:
@@ -67,6 +77,10 @@ if __name__ == "__main__":
         produtos = ler_produtos()
     except ErroExtracao as erro:
         sys.exit(f"erro na extracao: {erro}")
+
+    salvar_bruto("clientes", clientes)
+    salvar_bruto("pedidos", pedidos)
+
     print(f"extracao: clientes paginas={paginas_clientes} registros={len(clientes)}")
     print(f"extracao: pedidos paginas={paginas_pedidos} registros_brutos={len(pedidos)}")
     print(f"produtos={len(produtos)}")
