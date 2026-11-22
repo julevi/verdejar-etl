@@ -1,6 +1,5 @@
 import csv
 import json
-import sys
 from pathlib import Path
 
 import requests
@@ -67,20 +66,3 @@ def salvar_bruto(nome, registros, pasta=PASTA_BRUTOS):
     caminho = pasta / f"{nome}.json"
     with open(caminho, "w", encoding="utf-8") as arquivo:
         json.dump(registros, arquivo, ensure_ascii=False, indent=2)
-
-
-# Verificação temporária: sai daqui quando o main.py existir
-if __name__ == "__main__":
-    try:
-        clientes, paginas_clientes = extrair_rota("clientes")
-        pedidos, paginas_pedidos = extrair_rota("pedidos")
-        produtos = ler_produtos()
-    except ErroExtracao as erro:
-        sys.exit(f"erro na extracao: {erro}")
-
-    salvar_bruto("clientes", clientes)
-    salvar_bruto("pedidos", pedidos)
-
-    print(f"extracao: clientes paginas={paginas_clientes} registros={len(clientes)}")
-    print(f"extracao: pedidos paginas={paginas_pedidos} registros_brutos={len(pedidos)}")
-    print(f"produtos={len(produtos)}")
