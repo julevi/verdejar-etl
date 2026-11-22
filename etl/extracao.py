@@ -1,8 +1,12 @@
+import csv
 import sys
+from pathlib import Path
 
 import requests
 
 URL_BASE = "http://127.0.0.1:8000"
+RAIZ = Path(__file__).resolve().parent.parent
+CAMINHO_PRODUTOS = RAIZ / "insumos" / "dados" / "produtos.csv"
 
 
 class ErroExtracao(Exception):
@@ -32,6 +36,7 @@ def extrair_rota(rota, page_size=50):
                 f"GET /{rota} page={pagina} demorou mais de 10 segundos"
             ) from erro
 
+        # Só o 200 traz uma página completa; 204 ou 206 fariam o ETL perder dados
         if resposta.status_code != 200:
             raise ErroExtracao(
                 f"GET /{rota} page={pagina} respondeu status {resposta.status_code}"
@@ -45,10 +50,23 @@ def extrair_rota(rota, page_size=50):
     return registros, total_paginas
 
 
+def ler_produtos(caminho=CAMINHO_PRODUTOS):
+    """Lê o CSV de produtos e devolve uma lista de dicionários."""
+    try:
+        with open(caminho, encoding="utf-8", newline="") as arquivo:
+            return list(csv.DictReader(arquivo))
+    except FileNotFoundError as erro:
+        raise ErroExtracao(f"arquivo não encontrado: {caminho}") from erro
+
+
 # Verificação temporária: sai daqui quando o main.py existir
 if __name__ == "__main__":
     try:
-        clientes, paginas = extrair_rota("clientes")
+        clientes, paginas_clientes = extrair_rota("clientes")
+        pedidos, paginas_pedidos = extrair_rota("pedidos")
+        produtos = ler_produtos()
     except ErroExtracao as erro:
         sys.exit(f"erro na extracao: {erro}")
-    print(f"extracao: clientes paginas={paginas} registros={len(clientes)}")
+    print(f"extracao: clientes paginas={paginas_clientes} registros={len(clientes)}")
+    print(f"extracao: pedidos paginas={paginas_pedidos} registros_brutos={len(pedidos)}")
+    print(f"produtos={len(produtos)}")
