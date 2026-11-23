@@ -89,3 +89,45 @@ def transformar_clientes(clientes):
 
     contadores = {"emails_nulos": emails_nulos, "estados_padronizados": estados_padronizados}
     return tratados, contadores
+
+
+def transformar_pedidos(pedidos_brutos):
+    """Aplica A3 a A6 e devolve (pedidos tratados, itens, contadores)."""
+    unicos = remover_repetidos(pedidos_brutos)
+    pedidos = []
+    itens = []
+    datas_convertidas = 0
+    valores_convertidos = 0
+    divergentes = 0
+
+    for pedido in unicos:
+        if "/" in pedido["data_pedido"]:
+            datas_convertidas += 1
+        if isinstance(pedido["valor_total"], str):
+            valores_convertidos += 1
+
+        valor_total = converter_valor(pedido["valor_total"])
+        valor_itens = calcular_valor_itens(pedido["itens"])
+        divergente = pedido_divergente(valor_total, valor_itens)
+        if divergente:
+            divergentes += 1
+
+        pedidos.append({
+            "id": pedido["id"],
+            "cliente_id": pedido["cliente_id"],
+            "data_pedido": converter_data(pedido["data_pedido"]),
+            "status": pedido["status"],
+            "valor_total": valor_total,
+            "valor_itens": valor_itens,
+            "divergente": divergente,
+        })
+        itens.extend(separar_itens(pedido))
+
+    contadores = {
+        "pedidos_unicos": len(unicos),
+        "repetidos_descartados": len(pedidos_brutos) - len(unicos),
+        "datas_convertidas": datas_convertidas,
+        "valores_convertidos": valores_convertidos,
+        "divergentes": divergentes,
+    }
+    return pedidos, itens, contadores

@@ -11,6 +11,7 @@ from etl.transformacao import (
     remover_repetidos,
     separar_itens,
     transformar_clientes,
+    transformar_pedidos,
 )
 
 
@@ -97,3 +98,25 @@ def test_transformar_clientes_conta_emails_nulos_e_estados_padronizados():
     assert tratados[0]["email"] is None
     assert tratados[0]["estado"] == "SP"
     assert tratados[0]["cadastro_em"] == date(2025, 4, 4)
+
+
+def test_transformar_pedidos_aplica_armadilhas_e_conta():
+    item = {"produto_id": 1, "quantidade": 1, "preco_unitario": 10.0}
+    brutos = [
+        {"id": 1, "cliente_id": 5, "data_pedido": "19/02/2026", "status": "entregue", "valor_total": "10,00", "itens": [item]},
+        {"id": 1, "cliente_id": 5, "data_pedido": "19/02/2026", "status": "entregue", "valor_total": "10,00", "itens": [item]},
+        {"id": 2, "cliente_id": 6, "data_pedido": "2026-02-20", "status": "cancelado", "valor_total": 15.0, "itens": [item]},
+    ]
+    pedidos, itens, contadores = transformar_pedidos(brutos)
+
+    assert contadores == {
+        "pedidos_unicos": 2,
+        "repetidos_descartados": 1,
+        "datas_convertidas": 1,
+        "valores_convertidos": 1,
+        "divergentes": 1,
+    }
+    assert pedidos[0]["data_pedido"] == date(2026, 2, 19)
+    assert pedidos[0]["valor_total"] == Decimal("10.00")
+    assert pedidos[1]["divergente"] is True
+    assert len(itens) == 2
