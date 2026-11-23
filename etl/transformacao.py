@@ -62,3 +62,30 @@ def separar_itens(pedido):
         }
         for linha, item in enumerate(pedido["itens"], start=1)
     ]
+
+
+def transformar_clientes(clientes):
+    """Aplica A1 e A2 aos clientes e devolve (clientes tratados, contadores)."""
+    tratados = []
+    emails_nulos = 0
+    estados_padronizados = 0
+
+    for cliente in clientes:
+        if email_ausente(cliente["email"]):
+            emails_nulos += 1
+
+        estado = padronizar_estado(cliente["estado"])
+        if estado != cliente["estado"]:
+            estados_padronizados += 1
+
+        tratados.append({
+            "id": cliente["id"],
+            "nome": cliente["nome"],
+            "email": cliente["email"],
+            "cidade": cliente["cidade"],
+            "estado": estado,
+            "cadastro_em": converter_data(cliente["cadastro_em"]),
+        })
+
+    contadores = {"emails_nulos": emails_nulos, "estados_padronizados": estados_padronizados}
+    return tratados, contadores

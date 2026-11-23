@@ -10,6 +10,7 @@ from etl.transformacao import (
     pedido_divergente,
     remover_repetidos,
     separar_itens,
+    transformar_clientes,
 )
 
 
@@ -83,3 +84,16 @@ def test_separar_itens_gera_linha_pela_posicao():
         {"pedido_id": 7, "linha": 1, "produto_id": 2, "quantidade": 3, "preco_unitario": Decimal("4.30")},
         {"pedido_id": 7, "linha": 2, "produto_id": 9, "quantidade": 1, "preco_unitario": Decimal("15.86")},
     ]
+
+
+def test_transformar_clientes_conta_emails_nulos_e_estados_padronizados():
+    clientes = [
+        {"id": 1, "nome": "Ana", "email": None, "cidade": "Campinas", "estado": "sp", "cadastro_em": "2025-04-04"},
+        {"id": 2, "nome": "Bia", "email": "bia@exemplo.com", "cidade": "Curitiba", "estado": "PR", "cadastro_em": "2025-05-10"},
+    ]
+    tratados, contadores = transformar_clientes(clientes)
+
+    assert contadores == {"emails_nulos": 1, "estados_padronizados": 1}
+    assert tratados[0]["email"] is None
+    assert tratados[0]["estado"] == "SP"
+    assert tratados[0]["cadastro_em"] == date(2025, 4, 4)
