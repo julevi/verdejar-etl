@@ -15,3 +15,11 @@ def conectar():
         user=os.environ["DB_USER"],
         password=os.environ["DB_PASSWORD"],
     )
+
+
+def inserir_produtos(cursor, produtos):
+    """Insere os produtos tratados na tabela produtos."""
+    cursor.executemany(
+        "INSERT INTO produtos (produto_id, nome, categoria, preco_base) VALUES (%s, %s, %s, %s)",
+        [(p["produto_id"], p["nome"], p["categoria"], p["preco_base"]) for p in produtos],
+    )
