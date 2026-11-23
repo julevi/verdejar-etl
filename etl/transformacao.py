@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 
 
 def email_ausente(email):
@@ -16,3 +17,9 @@ def converter_data(texto):
     if "/" in texto:
         return datetime.strptime(texto, "%d/%m/%Y").date()
     return date.fromisoformat(texto)
+
+
+def converter_valor(valor):
+    """A4: converte 125.84 ou "125,84" em Decimal com 2 casas."""
+    texto = str(valor).replace(",", ".")
+    return Decimal(texto).quantize(Decimal("0.01"))
