@@ -1,4 +1,6 @@
-from etl.transformacao import email_ausente, padronizar_estado
+from datetime import date
+
+from etl.transformacao import converter_data, email_ausente, padronizar_estado
 
 
 def test_email_ausente_quando_nulo():
@@ -15,3 +17,11 @@ def test_padronizar_estado_minusculo():
 
 def test_padronizar_estado_ja_maiusculo():
     assert padronizar_estado("SP") == "SP"
+
+
+def test_converter_data_formato_iso():
+    assert converter_data("2026-02-19") == date(2026, 2, 19)
+
+
+def test_converter_data_formato_brasileiro():
+    assert converter_data("19/02/2026") == date(2026, 2, 19)
