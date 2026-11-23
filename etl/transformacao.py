@@ -131,3 +131,16 @@ def transformar_pedidos(pedidos_brutos):
         "divergentes": divergentes,
     }
     return pedidos, itens, contadores
+
+
+def transformar_produtos(produtos):
+    """Converte os campos do CSV, que chegam como texto, para os tipos da tabela produtos."""
+    return [
+        {
+            "produto_id": int(produto["produto_id"]),
+            "nome": produto["nome"],
+            "categoria": produto["categoria"],
+            "preco_base": converter_valor(produto["preco_base"]),
+        }
+        for produto in produtos
+    ]

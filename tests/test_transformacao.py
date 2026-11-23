@@ -12,6 +12,7 @@ from etl.transformacao import (
     separar_itens,
     transformar_clientes,
     transformar_pedidos,
+    transformar_produtos,
 )
 
 
@@ -120,3 +121,10 @@ def test_transformar_pedidos_aplica_armadilhas_e_conta():
     assert pedidos[0]["valor_total"] == Decimal("10.00")
     assert pedidos[1]["divergente"] is True
     assert len(itens) == 2
+
+
+def test_transformar_produtos_converte_tipos_do_csv():
+    produtos = [{"produto_id": "1", "nome": "Alface crespa", "categoria": "folhas", "preco_base": "3.5"}]
+    assert transformar_produtos(produtos) == [
+        {"produto_id": 1, "nome": "Alface crespa", "categoria": "folhas", "preco_base": Decimal("3.50")}
+    ]
