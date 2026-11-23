@@ -48,3 +48,17 @@ def calcular_valor_itens(itens):
 def pedido_divergente(valor_total, valor_itens):
     """A6: True quando a diferença entre os dois valores passa de 1 centavo."""
     return abs(valor_total - valor_itens) > Decimal("0.01")
+
+
+def separar_itens(pedido):
+    """Devolve os itens do pedido no formato de itens_pedido, com linha pela posição (1, 2, 3...)."""
+    return [
+        {
+            "pedido_id": pedido["id"],
+            "linha": linha,
+            "produto_id": item["produto_id"],
+            "quantidade": item["quantidade"],
+            "preco_unitario": converter_valor(item["preco_unitario"]),
+        }
+        for linha, item in enumerate(pedido["itens"], start=1)
+    ]

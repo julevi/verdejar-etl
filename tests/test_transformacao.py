@@ -9,6 +9,7 @@ from etl.transformacao import (
     padronizar_estado,
     pedido_divergente,
     remover_repetidos,
+    separar_itens,
 )
 
 
@@ -68,3 +69,17 @@ def test_pedido_divergente_quando_diferenca_passa_de_um_centavo():
 
 def test_pedido_nao_divergente_com_diferenca_de_um_centavo():
     assert pedido_divergente(Decimal("10.01"), Decimal("10.00")) is False
+
+
+def test_separar_itens_gera_linha_pela_posicao():
+    pedido = {
+        "id": 7,
+        "itens": [
+            {"produto_id": 2, "quantidade": 3, "preco_unitario": 4.3},
+            {"produto_id": 9, "quantidade": 1, "preco_unitario": 15.86},
+        ],
+    }
+    assert separar_itens(pedido) == [
+        {"pedido_id": 7, "linha": 1, "produto_id": 2, "quantidade": 3, "preco_unitario": Decimal("4.30")},
+        {"pedido_id": 7, "linha": 2, "produto_id": 9, "quantidade": 1, "preco_unitario": Decimal("15.86")},
+    ]
