@@ -2,10 +2,12 @@ from datetime import date
 from decimal import Decimal
 
 from etl.transformacao import (
+    calcular_valor_itens,
     converter_data,
     converter_valor,
     email_ausente,
     padronizar_estado,
+    pedido_divergente,
     remover_repetidos,
 )
 
@@ -50,3 +52,19 @@ def test_remover_repetidos_descarta_id_repetido():
 def test_remover_repetidos_mantem_primeira_ocorrencia():
     pedidos = [{"id": 1, "origem": "primeira"}, {"id": 1, "origem": "segunda"}]
     assert remover_repetidos(pedidos) == [{"id": 1, "origem": "primeira"}]
+
+
+def test_calcular_valor_itens_soma_em_decimal():
+    itens = [
+        {"produto_id": 2, "quantidade": 3, "preco_unitario": 4.3},
+        {"produto_id": 9, "quantidade": 2, "preco_unitario": 1.1},
+    ]
+    assert calcular_valor_itens(itens) == Decimal("15.10")
+
+
+def test_pedido_divergente_quando_diferenca_passa_de_um_centavo():
+    assert pedido_divergente(Decimal("125.84"), Decimal("120.84")) is True
+
+
+def test_pedido_nao_divergente_com_diferenca_de_um_centavo():
+    assert pedido_divergente(Decimal("10.01"), Decimal("10.00")) is False

@@ -35,3 +35,16 @@ def remover_repetidos(pedidos):
         ids_vistos.add(pedido["id"])
         unicos.append(pedido)
     return unicos
+
+
+def calcular_valor_itens(itens):
+    """A6: soma quantidade × preco_unitario dos itens do pedido."""
+    return sum(
+        item["quantidade"] * converter_valor(item["preco_unitario"])
+        for item in itens
+    )
+
+
+def pedido_divergente(valor_total, valor_itens):
+    """A6: True quando a diferença entre os dois valores passa de 1 centavo."""
+    return abs(valor_total - valor_itens) > Decimal("0.01")
