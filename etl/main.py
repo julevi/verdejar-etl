@@ -1,5 +1,6 @@
 import sys
 
+from etl.carga import carregar
 from etl.extracao import ErroExtracao, extrair_rota, ler_produtos, salvar_bruto
 from etl.transformacao import transformar_clientes, transformar_pedidos, transformar_produtos
 
@@ -31,6 +32,12 @@ def main():
         f"estados_padronizados={contadores_clientes['estados_padronizados']} "
         f"datas_convertidas={contadores_pedidos['datas_convertidas']} "
         f"valores_convertidos={contadores_pedidos['valores_convertidos']}"
+    )
+
+    contagens = carregar(produtos_tratados, clientes_tratados, pedidos_tratados, itens)
+    print(
+        f"carga: clientes={contagens['clientes']} produtos={contagens['produtos']} "
+        f"pedidos={contagens['pedidos']} itens={contagens['itens']}"
     )
 
 

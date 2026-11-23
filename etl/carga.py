@@ -60,3 +60,38 @@ def inserir_itens(cursor, itens):
             for i in itens
         ],
     )
+
+
+def carregar(produtos, clientes, pedidos, itens):
+    """Apaga os dados anteriores e grava as 4 tabelas em uma transação. Devolve as contagens."""
+    conexao = conectar()
+    try:
+        cursor = conexao.cursor()
+
+        # Idempotência: apaga na ordem inversa das chaves estrangeiras
+        cursor.execute("DELETE FROM itens_pedido")
+        cursor.execute("DELETE FROM pedidos")
+        cursor.execute("DELETE FROM clientes")
+        cursor.execute("DELETE FROM produtos")
+
+        # Insere na ordem direta das chaves estrangeiras
+        inserir_produtos(cursor, produtos)
+        inserir_clientes(cursor, clientes)
+        inserir_pedidos(cursor, pedidos)
+        inserir_itens(cursor, itens)
+
+        conexao.commit()
+
+        # Contagens lidas do banco, depois do commit
+        contagens = {}
+        cursor.execute("SELECT count(*) FROM clientes")
+        contagens["clientes"] = cursor.fetchone()[0]
+        cursor.execute("SELECT count(*) FROM produtos")
+        contagens["produtos"] = cursor.fetchone()[0]
+        cursor.execute("SELECT count(*) FROM pedidos")
+        contagens["pedidos"] = cursor.fetchone()[0]
+        cursor.execute("SELECT count(*) FROM itens_pedido")
+        contagens["itens"] = cursor.fetchone()[0]
+        return contagens
+    finally:
+        conexao.close()
