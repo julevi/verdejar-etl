@@ -1,4 +1,4 @@
 requests
-psycopg[binary]
+pg8000
 pytest
 python-dotenv
