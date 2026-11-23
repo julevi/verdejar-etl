@@ -95,3 +95,14 @@ def carregar(produtos, clientes, pedidos, itens):
         return contagens
     finally:
         conexao.close()
+
+
+def somar_valor_itens_no_banco():
+    """Reconciliação: devolve a soma de valor_itens gravada na tabela pedidos."""
+    conexao = conectar()
+    try:
+        cursor = conexao.cursor()
+        cursor.execute("SELECT sum(valor_itens) FROM pedidos")
+        return cursor.fetchone()[0]
+    finally:
+        conexao.close()

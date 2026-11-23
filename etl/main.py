@@ -1,6 +1,6 @@
 import sys
 
-from etl.carga import carregar
+from etl.carga import carregar, somar_valor_itens_no_banco
 from etl.extracao import ErroExtracao, extrair_rota, ler_produtos, salvar_bruto
 from etl.transformacao import transformar_clientes, transformar_pedidos, transformar_produtos
 
@@ -39,6 +39,15 @@ def main():
         f"carga: clientes={contagens['clientes']} produtos={contagens['produtos']} "
         f"pedidos={contagens['pedidos']} itens={contagens['itens']}"
     )
+
+    soma_origem = sum(p["valor_itens"] for p in pedidos_tratados)
+    soma_destino = somar_valor_itens_no_banco()
+    print(
+        f"reconciliacao: soma_valor_itens_origem={soma_origem} "
+        f"soma_valor_itens_destino={soma_destino} "
+        f"diferenca={soma_origem - soma_destino}"
+    )
+    print(f"divergentes: {contadores_pedidos['divergentes']} pedidos com valor_total diferente da soma dos itens")
 
 
 if __name__ == "__main__":
