@@ -42,7 +42,7 @@ Os registros da API são gravados sem alteração em `brutos/clientes.json` e `b
 | `status` | TEXT | não | `status` | sem alteração; valores: `entregue`, `em_transporte`, `cancelado` |
 | `valor_total` | NUMERIC(12,2) | não | `valor_total` | **A4:** chega como número (`125.84`) ou texto com vírgula (`"125,84"`); os dois viram `Decimal` com 2 casas. Contador: `valores_convertidos`, só os que vieram como texto |
 | `valor_itens` | NUMERIC(12,2) | não | calculado | **A6:** soma de `quantidade × preco_unitario` dos itens do pedido |
-| `divergente` | BOOLEAN | não | calculado | **A6:** `true` quando `|valor_total − valor_itens| > 0,01`. Contador: `divergentes` |
+| `divergente` | BOOLEAN | não | calculado | **A6:** `true` quando a diferença absoluta entre `valor_total` e `valor_itens` for maior que 0,01. Contador: `divergentes` |
 
 ## Tabela `itens_pedido`
 
