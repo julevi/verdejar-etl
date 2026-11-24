@@ -140,6 +140,17 @@ São 20 testes: 17 de transformação (as seis armadilhas, a separação dos ite
 (10 rows)
 ```
 
+Teste de consulta: a soma dos 10 meses é igual à soma geral da tabela, com o mesmo filtro (sem pedidos `cancelado`).
+
+```
+ total_geral 
+-------------
+   247462.32
+(1 row)
+```
+
+Soma dos 10 meses: 247462.32 · Soma geral: 247462.32 · Diferença: 0.00
+
 (b) Pedidos por estado
 
 ```

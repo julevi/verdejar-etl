@@ -8,6 +8,11 @@ WHERE status <> 'cancelado'
 GROUP BY mes
 ORDER BY mes;
 
+-- Teste de consulta da (a): a soma geral, com o mesmo filtro, deve ser igual à soma dos meses
+SELECT sum(valor_itens) AS total_geral
+FROM pedidos
+WHERE status <> 'cancelado';
+
 
 -- (b) Quantidade de pedidos por estado
 -- Inclui todos os status: a pergunta é sobre pedidos, não sobre vendas
