@@ -1,0 +1,146 @@
+from datetime import date, datetime
+from decimal import Decimal
+
+
+def email_ausente(email):
+    """A1: True quando o e-mail veio nulo. O cliente é mantido e o e-mail fica None."""
+    return email is None
+
+
+def padronizar_estado(estado):
+    """A2: devolve a sigla do estado em maiúsculas ("sp" vira "SP")."""
+    return estado.upper()
+
+
+def converter_data(texto):
+    """A3: converte "AAAA-MM-DD" ou "DD/MM/AAAA" em date."""
+    if "/" in texto:
+        return datetime.strptime(texto, "%d/%m/%Y").date()
+    return date.fromisoformat(texto)
+
+
+def converter_valor(valor):
+    """A4: converte 125.84 ou "125,84" em Decimal com 2 casas."""
+    texto = str(valor).replace(",", ".")
+    return Decimal(texto).quantize(Decimal("0.01"))
+
+
+def remover_repetidos(pedidos):
+    """A5: mantém só a primeira ocorrência de cada id, na ordem original."""
+    ids_vistos = set()
+    unicos = []
+    for pedido in pedidos:
+        if pedido["id"] in ids_vistos:
+            continue
+        ids_vistos.add(pedido["id"])
+        unicos.append(pedido)
+    return unicos
+
+
+def calcular_valor_itens(itens):
+    """A6: soma quantidade × preco_unitario dos itens do pedido."""
+    return sum(
+        item["quantidade"] * converter_valor(item["preco_unitario"])
+        for item in itens
+    )
+
+
+def pedido_divergente(valor_total, valor_itens):
+    """A6: True quando a diferença entre os dois valores passa de 1 centavo."""
+    return abs(valor_total - valor_itens) > Decimal("0.01")
+
+
+def separar_itens(pedido):
+    """Devolve os itens do pedido no formato de itens_pedido, com linha pela posição (1, 2, 3...)."""
+    return [
+        {
+            "pedido_id": pedido["id"],
+            "linha": linha,
+            "produto_id": item["produto_id"],
+            "quantidade": item["quantidade"],
+            "preco_unitario": converter_valor(item["preco_unitario"]),
+        }
+        for linha, item in enumerate(pedido["itens"], start=1)
+    ]
+
+
+def transformar_clientes(clientes):
+    """Aplica A1 e A2 aos clientes e devolve (clientes tratados, contadores)."""
+    tratados = []
+    emails_nulos = 0
+    estados_padronizados = 0
+
+    for cliente in clientes:
+        if email_ausente(cliente["email"]):
+            emails_nulos += 1
+
+        estado = padronizar_estado(cliente["estado"])
+        if estado != cliente["estado"]:
+            estados_padronizados += 1
+
+        tratados.append({
+            "id": cliente["id"],
+            "nome": cliente["nome"],
+            "email": cliente["email"],
+            "cidade": cliente["cidade"],
+            "estado": estado,
+            "cadastro_em": converter_data(cliente["cadastro_em"]),
+        })
+
+    contadores = {"emails_nulos": emails_nulos, "estados_padronizados": estados_padronizados}
+    return tratados, contadores
+
+
+def transformar_pedidos(pedidos_brutos):
+    """Aplica A3 a A6 e devolve (pedidos tratados, itens, contadores)."""
+    unicos = remover_repetidos(pedidos_brutos)
+    pedidos = []
+    itens = []
+    datas_convertidas = 0
+    valores_convertidos = 0
+    divergentes = 0
+
+    for pedido in unicos:
+        if "/" in pedido["data_pedido"]:
+            datas_convertidas += 1
+        if isinstance(pedido["valor_total"], str):
+            valores_convertidos += 1
+
+        valor_total = converter_valor(pedido["valor_total"])
+        valor_itens = calcular_valor_itens(pedido["itens"])
+        divergente = pedido_divergente(valor_total, valor_itens)
+        if divergente:
+            divergentes += 1
+
+        pedidos.append({
+            "id": pedido["id"],
+            "cliente_id": pedido["cliente_id"],
+            "data_pedido": converter_data(pedido["data_pedido"]),
+            "status": pedido["status"],
+            "valor_total": valor_total,
+            "valor_itens": valor_itens,
+            "divergente": divergente,
+        })
+        itens.extend(separar_itens(pedido))
+
+    contadores = {
+        "pedidos_unicos": len(unicos),
+        "repetidos_descartados": len(pedidos_brutos) - len(unicos),
+        "datas_convertidas": datas_convertidas,
+        "valores_convertidos": valores_convertidos,
+        "divergentes": divergentes,
+    }
+    return pedidos, itens, contadores
+
+
+def transformar_produtos(produtos):
+    """Converte os campos do CSV, que chegam como texto, para os tipos da tabela produtos."""
+    return [
+        {
+            "produto_id": int(produto["produto_id"]),
+            "nome": produto["nome"],
+            "categoria": produto["categoria"],
+            "preco_base": converter_valor(produto["preco_base"]),
+        }
+        for produto in produtos
+    ]

@@ -1,0 +1,4 @@
+requests
+pg8000
+pytest
+python-dotenv
